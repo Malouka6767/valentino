@@ -2,92 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flashlight Game</title>
-
 <style>
     html, body {
         margin: 0;
         padding: 0;
-        overflow: hidden;
+        width: 100%;
         height: 100%;
+        overflow: hidden;
         cursor: none;
+        background: black;
     }
 
-    body {
-        background-color: black;
+    #game {
         position: relative;
+        width: 100%;
+        height: 100%;
     }
 
-    #flashlight {
-        position: absolute;
-        pointer-events: none;
-        width: 300px;
-        height: 300px;
-        border-radius: 50%;
-        box-shadow: 0 0 0 9999px rgba(0,0,0,0.95);
-        mix-blend-mode: multiply;
-        transition: 0.05s ease;
-    }
-
+    /* Hidden bouquet */
     #target {
         position: absolute;
-        width: 200px;
-        display: block;
-        opacity: 1;
-        transition: opacity 0.3s ease;
+        width: 180px;
+        z-index: 1;
+    }
+
+    /* Dark overlay */
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        background: radial-gradient(
+            circle 120px at 0 0,
+            transparent 0%,
+            rgba(0,0,0,0.98) 70%
+        );
+        z-index: 2;
     }
 
     #message {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px 40px;
-        font-size: 2rem;
-        border-radius: 10px;
+        inset: 0;
         display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0,0,0,0.9);
+        color: white;
+        font-size: 2.5rem;
+        z-index: 3;
+        text-align: center;
     }
 </style>
-
 </head>
+
 <body>
+<div id="game">
+    <img id="target"
+         src="https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg"
+         alt="Bouquet">
+</div>
 
-<div id="flashlight"></div>
-<img id="target" src="https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg" alt="Bouquet">
+<div id="overlay"></div>
 
-<div id="message">Now you're my valentine!</div>
+<div id="message">💖 Now you're my valentine! 💖</div>
 
 <script>
-    const flashlight = document.getElementById('flashlight');
-    const target = document.getElementById('target');
-    const message = document.getElementById('message');
+    const overlay = document.getElementById("overlay");
+    const target = document.getElementById("target");
+    const message = document.getElementById("message");
 
-    // Place target randomly at start
+    // Random position for bouquet
     function placeTarget() {
-        const x = Math.random() * (window.innerWidth - 200);
-        const y = Math.random() * (window.innerHeight - 200);
-        target.style.left = x + 'px';
-        target.style.top = y + 'px';
+        const x = Math.random() * (window.innerWidth - 180);
+        const y = Math.random() * (window.innerHeight - 180);
+        target.style.left = x + "px";
+        target.style.top = y + "px";
     }
     placeTarget();
 
-    // Flashlight follows cursor
-    window.addEventListener('mousemove', (e) => {
-        flashlight.style.left = (e.pageX - 150) + 'px';
-        flashlight.style.top = (e.pageY - 150) + 'px';
+    window.addEventListener("mousemove", e => {
+        overlay.style.background = `
+            radial-gradient(
+                circle 120px at ${e.clientX}px ${e.clientY}px,
+                transparent 0%,
+                rgba(0,0,0,0.98) 70%
+            )
+        `;
 
-        // Check if cursor is near the target
+        // collision detection
         const rect = target.getBoundingClientRect();
-        if (e.clientX > rect.left && e.clientX < rect.right &&
-            e.clientY > rect.top && e.clientY < rect.bottom) {
-
-            // Show message
-            message.style.display = 'block';
+        if (
+            e.clientX > rect.left &&
+            e.clientX < rect.right &&
+            e.clientY > rect.top &&
+            e.clientY < rect.bottom
+        ) {
+            message.style.display = "flex";
         }
     });
 </script>
-
 </body>
 </html>
