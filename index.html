@@ -9,7 +9,10 @@
         padding: 0;
         background: black;
         overflow: hidden;
-        cursor: none;
+    }
+
+    canvas {
+        display: block;
     }
 
     #message {
@@ -29,7 +32,6 @@
 <body>
 
 <canvas id="game"></canvas>
-
 <div id="message">💖 Now you're my valentine! 💖</div>
 
 <script>
@@ -40,17 +42,21 @@ const message = document.getElementById("message");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Load bouquet image
+// Bouquet image
 const img = new Image();
 img.src = "https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg";
 
 const target = {
-    x: Math.random() * (canvas.width - 200),
-    y: Math.random() * (canvas.height - 200),
+    x: Math.random() * (canvas.width - 180),
+    y: Math.random() * (canvas.height - 180),
     size: 180
 };
 
-let mouse = { x: -1000, y: -1000 };
+// START mouse in center so flashlight is visible immediately
+let mouse = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+};
 
 window.addEventListener("mousemove", e => {
     mouse.x = e.clientX;
@@ -67,14 +73,21 @@ function draw() {
     ctx.fillStyle = "rgba(0,0,0,0.98)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Flashlight hole
+    // Cut flashlight hole
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
     ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalCompositeOperation = "source-over";
 
-    // Check collision
+    // 🔦 Draw flashlight outline (VISIBLE!)
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Collision check
     if (
         mouse.x > target.x &&
         mouse.x < target.x + target.size &&
@@ -89,7 +102,6 @@ function draw() {
 
 img.onload = draw;
 
-// Resize support
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
