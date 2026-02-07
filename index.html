@@ -7,40 +7,9 @@
     html, body {
         margin: 0;
         padding: 0;
-        width: 100%;
-        height: 100%;
+        background: black;
         overflow: hidden;
         cursor: none;
-        background: black;
-    }
-
-    #game {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Hidden bouquet */
-    #target {
-        position: absolute;
-        width: 180px;
-        z-index: 1;
-    }
-
-    /* Dark overlay */
-    #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        background: radial-gradient(
-            circle 120px at 0 0,
-            transparent 0%,
-            rgba(0,0,0,0.98) 70%
-        );
-        z-index: 2;
     }
 
     #message {
@@ -52,57 +21,80 @@
         background: rgba(0,0,0,0.9);
         color: white;
         font-size: 2.5rem;
-        z-index: 3;
+        z-index: 10;
         text-align: center;
     }
 </style>
 </head>
-
 <body>
-<div id="game">
-    <img id="target"
-         src="https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg"
-         alt="Bouquet">
-</div>
 
-<div id="overlay"></div>
+<canvas id="game"></canvas>
 
 <div id="message">💖 Now you're my valentine! 💖</div>
 
 <script>
-    const overlay = document.getElementById("overlay");
-    const target = document.getElementById("target");
-    const message = document.getElementById("message");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const message = document.getElementById("message");
 
-    // Random position for bouquet
-    function placeTarget() {
-        const x = Math.random() * (window.innerWidth - 180);
-        const y = Math.random() * (window.innerHeight - 180);
-        target.style.left = x + "px";
-        target.style.top = y + "px";
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Load bouquet image
+const img = new Image();
+img.src = "https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg";
+
+const target = {
+    x: Math.random() * (canvas.width - 200),
+    y: Math.random() * (canvas.height - 200),
+    size: 180
+};
+
+let mouse = { x: -1000, y: -1000 };
+
+window.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw bouquet
+    ctx.drawImage(img, target.x, target.y, target.size, target.size);
+
+    // Darkness
+    ctx.fillStyle = "rgba(0,0,0,0.98)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Flashlight hole
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
+
+    // Check collision
+    if (
+        mouse.x > target.x &&
+        mouse.x < target.x + target.size &&
+        mouse.y > target.y &&
+        mouse.y < target.y + target.size
+    ) {
+        message.style.display = "flex";
     }
-    placeTarget();
 
-    window.addEventListener("mousemove", e => {
-        overlay.style.background = `
-            radial-gradient(
-                circle 120px at ${e.clientX}px ${e.clientY}px,
-                transparent 0%,
-                rgba(0,0,0,0.98) 70%
-            )
-        `;
+    requestAnimationFrame(draw);
+}
 
-        // collision detection
-        const rect = target.getBoundingClientRect();
-        if (
-            e.clientX > rect.left &&
-            e.clientX < rect.right &&
-            e.clientY > rect.top &&
-            e.clientY < rect.bottom
-        ) {
-            message.style.display = "flex";
-        }
-    });
+img.onload = draw;
+
+// Resize support
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
 </script>
+
 </body>
 </html>
