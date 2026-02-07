@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashlight Game</title>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+        cursor: none;
+    }
+
+    body {
+        background-color: black;
+        position: relative;
+    }
+
+    #flashlight {
+        position: absolute;
+        pointer-events: none;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 9999px rgba(0,0,0,0.95);
+        mix-blend-mode: multiply;
+        transition: 0.05s ease;
+    }
+
+    #target {
+        position: absolute;
+        width: 200px;
+        display: block;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    #message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px 40px;
+        font-size: 2rem;
+        border-radius: 10px;
+        display: none;
+    }
+</style>
+
+</head>
+<body>
+
+<div id="flashlight"></div>
+<img id="target" src="https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg" alt="Bouquet">
+
+<div id="message">Now you're my valentine!</div>
+
+<script>
+    const flashlight = document.getElementById('flashlight');
+    const target = document.getElementById('target');
+    const message = document.getElementById('message');
+
+    // Place target randomly at start
+    function placeTarget() {
+        const x = Math.random() * (window.innerWidth - 200);
+        const y = Math.random() * (window.innerHeight - 200);
+        target.style.left = x + 'px';
+        target.style.top = y + 'px';
+    }
+    placeTarget();
+
+    // Flashlight follows cursor
+    window.addEventListener('mousemove', (e) => {
+        flashlight.style.left = (e.pageX - 150) + 'px';
+        flashlight.style.top = (e.pageY - 150) + 'px';
+
+        // Check if cursor is near the target
+        const rect = target.getBoundingClientRect();
+        if (e.clientX > rect.left && e.clientX < rect.right &&
+            e.clientY > rect.top && e.clientY < rect.bottom) {
+
+            // Show message
+            message.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>
