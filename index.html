@@ -2,9 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Flashlight Test</title>
+<title>Flashlight FIXED</title>
 <style>
-  body { margin:0; background:black; overflow:hidden; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+  }
 </style>
 </head>
 <body>
@@ -14,36 +18,40 @@
 <script>
 const c = document.getElementById("c");
 const ctx = c.getContext("2d");
+
 c.width = innerWidth;
 c.height = innerHeight;
 
-let mouse = { x: c.width/2, y: c.height/2 };
+let mouse = { x: c.width / 2, y: c.height / 2 };
+
 addEventListener("mousemove", e => {
   mouse.x = e.clientX;
   mouse.y = e.clientY;
 });
 
 function draw() {
-  ctx.clearRect(0,0,c.width,c.height);
+  ctx.clearRect(0, 0, c.width, c.height);
 
-  // darkness
-  ctx.fillStyle = "black";
-  ctx.fillRect(0,0,c.width,c.height);
-
-  // flashlight hole
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI*2);
-  ctx.clip();
-
-  // hidden object (RED BOX)
+  // 1️⃣ DRAW THE WORLD FIRST (hidden object)
   ctx.fillStyle = "red";
   ctx.fillRect(400, 300, 200, 200);
 
-  ctx.restore();
+  // 2️⃣ DRAW DARKNESS OVER EVERYTHING
+  ctx.fillStyle = "rgba(0,0,0,0.98)";
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  // 3️⃣ CUT HOLE IN DARKNESS
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 4️⃣ RESET MODE
+  ctx.globalCompositeOperation = "source-over";
 
   requestAnimationFrame(draw);
 }
+
 draw();
 </script>
 
