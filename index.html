@@ -1,58 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Flashlight FIXED</title>
+<title>Find the Bouquet</title>
+
 <style>
-  body {
+  html, body {
     margin: 0;
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
     background: black;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* Bouquet */
+  #bouquet {
+    position: absolute;
+    width: 180px;
+    left: 60%;
+    top: 40%;
+    z-index: 1;
+  }
+
+  /* Darkness overlay */
+  #darkness {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle 120px at var(--x) var(--y),
+      transparent 0%,
+      rgba(0,0,0,0.97) 70%);
+    z-index: 2;
+  }
+
+  /* Message */
+  #message {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.9);
+    color: white;
+    font-size: 2.5rem;
+    z-index: 3;
+    text-align: center;
   }
 </style>
 </head>
 <body>
 
-<canvas id="c"></canvas>
+<img id="bouquet"
+     src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Bouquet_of_flowers.jpg/512px-Bouquet_of_flowers.jpg">
+
+<div id="darkness"></div>
+<div id="message">💖 Now you're my valentine! 💖</div>
 
 <script>
-const c = document.getElementById("c");
-const ctx = c.getContext("2d");
+const darkness = document.getElementById("darkness");
+const bouquet = document.getElementById("bouquet");
+const message = document.getElementById("message");
 
-c.width = innerWidth;
-c.height = innerHeight;
+document.addEventListener("mousemove", e => {
+  darkness.style.setProperty("--x", e.clientX + "px");
+  darkness.style.setProperty("--y", e.clientY + "px");
 
-let mouse = { x: c.width / 2, y: c.height / 2 };
-
-addEventListener("mousemove", e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
+  const rect = bouquet.getBoundingClientRect();
+  if (
+    e.clientX > rect.left &&
+    e.clientX < rect.right &&
+    e.clientY > rect.top &&
+    e.clientY < rect.bottom
+  ) {
+    message.style.display = "flex";
+  }
 });
-
-function draw() {
-  ctx.clearRect(0, 0, c.width, c.height);
-
-  // 1️⃣ DRAW THE WORLD FIRST (hidden object)
-  ctx.fillStyle = "red";
-  ctx.fillRect(400, 300, 200, 200);
-
-  // 2️⃣ DRAW DARKNESS OVER EVERYTHING
-  ctx.fillStyle = "rgba(0,0,0,0.98)";
-  ctx.fillRect(0, 0, c.width, c.height);
-
-  // 3️⃣ CUT HOLE IN DARKNESS
-  ctx.globalCompositeOperation = "destination-out";
-  ctx.beginPath();
-  ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 4️⃣ RESET MODE
-  ctx.globalCompositeOperation = "source-over";
-
-  requestAnimationFrame(draw);
-}
-
-draw();
 </script>
 
 </body>
