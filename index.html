@@ -2,61 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Error</title>
-
+<title>Draw a Heart</title>
 <style>
   body {
     margin: 0;
+    background: #111;
+    color: white;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     height: 100vh;
-    background: #0b0b0b;
-    color: #e5e5e5;
-    font-family: monospace;
+  }
+
+  canvas {
+    background: black;
+    border: 2px solid #ff4d6d;
+    cursor: crosshair;
+  }
+
+  #text {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+  }
+
+  #message {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    color: white;
+    font-size: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
   }
-
-  #box {
-    max-width: 600px;
-  }
-
-  h1 {
-    font-size: 4rem;
-    margin-bottom: 10px;
-  }
-
-  p {
-    font-size: 1.2rem;
-    opacity: 0.8;
-  }
-
-  #final {
-    display: none;
-    font-size: 2.5rem;
-    color: #ff4d6d;
-  }
 </style>
 </head>
 <body>
 
-<div id="box">
-  <h1 id="code">404</h1>
-  <p id="text">This page could not be found.</p>
-  <div id="final">💖 Now you’re my Valentine 💖</div>
-</div>
+<div id="text">Draw a heart ❤️</div>
+<canvas id="c" width="400" height="400"></canvas>
+
+<div id="message">💖 Now you’re my valentine 💖</div>
 
 <script>
-setTimeout(() => {
-  document.getElementById("code").textContent = "Wait...";
-  document.getElementById("text").textContent = "This page isn’t broken.";
-}, 2500);
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const message = document.getElementById("message");
 
-setTimeout(() => {
-  document.getElementById("code").style.display = "none";
-  document.getElementById("text").style.display = "none";
-  document.getElementById("final").style.display = "block";
-}, 4500);
+let drawing = false;
+let points = [];
+
+canvas.addEventListener("mousedown", e => {
+  drawing = true;
+  points = [];
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
+});
+
+canvas.addEventListener("mousemove", e => {
+  if (!drawing) return;
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.strokeStyle = "#ff4d6d";
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  ctx.stroke();
+  points.push({ x: e.offsetX, y: e.offsetY });
+});
+
+canvas.addEventListener("mouseup", finish);
+canvas.addEventListener("mouseleave", finish);
+
+function finish() {
+  if (!drawing) return;
+  drawing = false;
+
+  if (points.length < 50) return; // too small
+
+  let xs = points.map(p => p.x);
+  let ys = points.map(p => p.y);
+
+  let width = Math.max(...xs) - Math.min(...xs);
+  let height = Math.max(...ys) - Math.min(...ys);
+
+  // 💡 SIMPLE HEART CHECK
+  if (width > 120 && height > 120 && Math.abs(width - height) < 120) {
+    message.style.display = "flex";
+  }
+}
 </script>
 
 </body>
