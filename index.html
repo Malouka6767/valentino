@@ -10,11 +10,9 @@
         background: black;
         overflow: hidden;
     }
-
     canvas {
         display: block;
     }
-
     #message {
         position: fixed;
         inset: 0;
@@ -46,13 +44,14 @@ canvas.height = window.innerHeight;
 const img = new Image();
 img.src = "https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg";
 
+// Target
 const target = {
     x: Math.random() * (canvas.width - 180),
     y: Math.random() * (canvas.height - 180),
     size: 180
 };
 
-// START mouse in center so flashlight is visible immediately
+// Mouse starts centered
 let mouse = {
     x: canvas.width / 2,
     y: canvas.height / 2
@@ -66,28 +65,29 @@ window.addEventListener("mousemove", e => {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw bouquet
-    ctx.drawImage(img, target.x, target.y, target.size, target.size);
-
-    // Darkness
+    // 1️⃣ Draw full darkness
     ctx.fillStyle = "rgba(0,0,0,0.98)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Cut flashlight hole
-    ctx.globalCompositeOperation = "destination-out";
+    // 2️⃣ Create flashlight hole
+    ctx.save();
     ctx.beginPath();
     ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalCompositeOperation = "source-over";
+    ctx.clip();
 
-    // 🔦 Draw flashlight outline (VISIBLE!)
+    // 3️⃣ Draw bouquet ONLY inside hole
+    ctx.drawImage(img, target.x, target.y, target.size, target.size);
+
+    ctx.restore();
+
+    // 4️⃣ Draw flashlight outline (visual feedback)
     ctx.beginPath();
     ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
     ctx.strokeStyle = "rgba(255,255,255,0.4)";
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Collision check
+    // Collision detection
     if (
         mouse.x > target.x &&
         mouse.x < target.x + target.size &&
