@@ -2,98 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Draw a Heart</title>
+<title>Valentine Chat</title>
 <style>
   body {
     margin: 0;
-    background: #111;
-    color: white;
+    padding: 0;
+    background: #f0f0f0;
     font-family: sans-serif;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
   }
 
-  canvas {
-    background: black;
-    border: 2px solid #ff4d6d;
-    cursor: crosshair;
-  }
-
-  #text {
-    margin-bottom: 10px;
-    font-size: 1.5rem;
-  }
-
-  #message {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.9);
-    color: white;
-    font-size: 2.5rem;
+  #chat {
+    width: 350px;
+    height: 600px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+  }
+
+  .msg {
+    max-width: 70%;
+    margin: 5px 0;
+    padding: 10px 15px;
+    border-radius: 20px;
+    word-wrap: break-word;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+  }
+
+  .bot {
+    background: #ff4d6d;
+    color: white;
+    align-self: flex-start;
+  }
+
+  .user {
+    background: #ddd;
+    color: black;
+    align-self: flex-end;
+  }
+
+  #buttons {
+    padding: 10px;
+    display: flex;
     justify-content: center;
-    text-align: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 15px;
+    background: #ff4d6d;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
   }
 </style>
 </head>
 <body>
 
-<div id="text">Draw a heart ❤️</div>
-<canvas id="c" width="400" height="400"></canvas>
-
-<div id="message">💖 Now you’re my valentine 💖</div>
+<div id="chat">
+  <div id="messages"></div>
+  <div id="buttons"></div>
+</div>
 
 <script>
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
-const message = document.getElementById("message");
+const messagesDiv = document.getElementById("messages");
+const buttonsDiv = document.getElementById("buttons");
 
-let drawing = false;
-let points = [];
+// Chat script
+const chat = [
+  { text: "Hey there…", sender: "bot", delay: 1000 },
+  { text: "I have a question for you 💖", sender: "bot", delay: 2000 },
+  { text: "Will you be my Valentine?", sender: "bot", delay: 2000, options: ["Yes 💘", "Of course ❤️", "No 😢"] },
+  { text: "Yay! I knew it 😍", sender: "bot", delay: 1500, final: true }
+];
 
-canvas.addEventListener("mousedown", e => {
-  drawing = true;
-  points = [];
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
-});
+let step = 0;
 
-canvas.addEventListener("mousemove", e => {
-  if (!drawing) return;
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.strokeStyle = "#ff4d6d";
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  ctx.stroke();
-  points.push({ x: e.offsetX, y: e.offsetY });
-});
+function showMessage(msg) {
+  const div = document.createElement("div");
+  div.className = "msg " + msg.sender;
+  div.textContent = msg.text;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-canvas.addEventListener("mouseup", finish);
-canvas.addEventListener("mouseleave", finish);
-
-function finish() {
-  if (!drawing) return;
-  drawing = false;
-
-  if (points.length < 50) return; // too small
-
-  let xs = points.map(p => p.x);
-  let ys = points.map(p => p.y);
-
-  let width = Math.max(...xs) - Math.min(...xs);
-  let height = Math.max(...ys) - Math.min(...ys);
-
-  // 💡 SIMPLE HEART CHECK
-  if (width > 120 && height > 120 && Math.abs(width - height) < 120) {
-    message.style.display = "flex";
+  if (msg.options) {
+    buttonsDiv.innerHTML = "";
+    msg.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.onclick = () => {
+        addUserMessage(opt);
+        buttonsDiv.innerHTML = "";
+        nextStep();
+      };
+      buttonsDiv.appendChild(btn);
+    });
+  } else {
+    setTimeout(nextStep, msg.delay);
   }
 }
+
+function addUserMessage(text) {
+  const div = document.createElement("div");
+  div.className = "msg user";
+  div.textContent = text;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function nextStep() {
+  step++;
+  if (step < chat.length) {
+    showMessage(chat[step]);
+  }
+}
+
+showMessage(chat[step]);
 </script>
 
 </body>
