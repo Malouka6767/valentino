@@ -43,7 +43,7 @@
   }
 
   .bot {
-    background: #ff4d6d;
+    background: #4d79ff;
     color: white;
     align-self: flex-start;
   }
@@ -66,7 +66,7 @@
     padding: 8px 15px;
     border: none;
     border-radius: 15px;
-    background: #ff4d6d;
+    background: #4d79ff;
     color: white;
     cursor: pointer;
     font-size: 1rem;
@@ -88,15 +88,45 @@
 const messagesDiv = document.getElementById("messages");
 const buttonsDiv = document.getElementById("buttons");
 
-// Chat script
+// Full chat logic with choices
 const chat = [
-  { text: "Hey there…", sender: "bot", delay: 1000 },
-  { text: "I have a question for you 💖", sender: "bot", delay: 2000 },
-  { text: "Will you be my Valentine?", sender: "bot", delay: 2000, options: ["Yes 💘", "Of course ❤️", "No 😢"] },
-  { text: "Yay! I knew it 😍", sender: "bot", delay: 1500, final: true }
+  { id: 0, text: "Hi! I wanted to ask you something.", sender: "bot" },
+  { id: 1, text: "Do you like surprises?", sender: "bot", options: ["Yes", "No"] },
+
+  // Responses if Yes
+  { id: 2, text: "Great! I love giving surprises.", sender: "bot", parentChoice: "Yes" },
+  { id: 3, text: "I was wondering if you'd like to go on a little adventure this week.", sender: "bot" },
+  { id: 4, text: "Do you enjoy outdoor activities or cozy indoor plans?", sender: "bot", options: ["Outdoor", "Indoor"], parentChoice: "Yes" },
+
+  // Responses if No
+  { id: 5, text: "I understand, surprises are not for everyone.", sender: "bot", parentChoice: "No" },
+  { id: 6, text: "We could plan something simple and relaxing together. How does that sound?", sender: "bot" },
+  { id: 7, text: "Do you prefer a movie night or a nice dinner?", sender: "bot", options: ["Movie night", "Dinner"], parentChoice: "No" },
+
+  // Outdoor branch
+  { id: 8, text: "Awesome! I know a nice place we could explore. It's scenic and quiet.", sender: "bot", parentChoice: "Outdoor" },
+  { id: 9, text: "Does Saturday work for you?", sender: "bot", options: ["Yes", "No"], parentChoice: "Outdoor" },
+
+  // Indoor branch
+  { id: 10, text: "Cozy sounds perfect. We could bake together or just chat with some tea.", sender: "bot", parentChoice: "Indoor" },
+  { id: 11, text: "Do you like trying new recipes?", sender: "bot", options: ["Yes", "No"], parentChoice: "Indoor" },
+
+  // Movie night branch
+  { id: 12, text: "Movie night sounds fun! I’ll pick a film you love.", sender: "bot", parentChoice: "Movie night" },
+  { id: 13, text: "Shall we watch it this Friday?", sender: "bot", options: ["Yes", "No"], parentChoice: "Movie night" },
+
+  // Dinner branch
+  { id: 14, text: "Dinner it is! I know a quiet place you might like.", sender: "bot", parentChoice: "Dinner" },
+  { id: 15, text: "Do you want to go Saturday evening?", sender: "bot", options: ["Yes", "No"], parentChoice: "Dinner" },
+
+  // Final messages for all branches
+  { id: 16, text: "I'm so glad we planned this together.", sender: "bot", final: true, parentChoice: "Yes" },
+  { id: 17, text: "I'm looking forward to spending this time with you.", sender: "bot", final: true, parentChoice: "No" }
 ];
 
+// Keep track of which choice user made
 let step = 0;
+let lastChoice = null;
 
 function showMessage(msg) {
   const div = document.createElement("div");
@@ -112,13 +142,14 @@ function showMessage(msg) {
       btn.textContent = opt;
       btn.onclick = () => {
         addUserMessage(opt);
+        lastChoice = opt;
         buttonsDiv.innerHTML = "";
         nextStep();
       };
       buttonsDiv.appendChild(btn);
     });
   } else {
-    setTimeout(nextStep, msg.delay);
+    setTimeout(nextStep, 1000);
   }
 }
 
@@ -132,11 +163,25 @@ function addUserMessage(text) {
 
 function nextStep() {
   step++;
-  if (step < chat.length) {
-    showMessage(chat[step]);
+  if (step >= chat.length) return;
+
+  const nextMsg = chat[step];
+
+  // Skip messages not matching lastChoice if parentChoice is set
+  if (nextMsg.parentChoice && nextMsg.parentChoice !== lastChoice) {
+    nextStep();
+    return;
+  }
+
+  showMessage(nextMsg);
+
+  // If final message, disable buttons
+  if (nextMsg.final) {
+    buttonsDiv.innerHTML = "";
   }
 }
 
+// Start the chat
 showMessage(chat[step]);
 </script>
 
