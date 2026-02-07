@@ -1,111 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Flashlight Game</title>
+<title>Flashlight Test</title>
 <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        background: black;
-        overflow: hidden;
-    }
-    canvas {
-        display: block;
-    }
-    #message {
-        position: fixed;
-        inset: 0;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        background: rgba(0,0,0,0.9);
-        color: white;
-        font-size: 2.5rem;
-        z-index: 10;
-        text-align: center;
-    }
+  body { margin:0; background:black; overflow:hidden; }
 </style>
 </head>
 <body>
 
-<canvas id="game"></canvas>
-<div id="message">💖 Now you're my valentine! 💖</div>
+<canvas id="c"></canvas>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const message = document.getElementById("message");
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+c.width = innerWidth;
+c.height = innerHeight;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// Bouquet image
-const img = new Image();
-img.src = "https://m.media-amazon.com/images/I/71dEnbFkofL._AC_UF894,1000_QL80_.jpg";
-
-// Target
-const target = {
-    x: Math.random() * (canvas.width - 180),
-    y: Math.random() * (canvas.height - 180),
-    size: 180
-};
-
-// Mouse starts centered
-let mouse = {
-    x: canvas.width / 2,
-    y: canvas.height / 2
-};
-
-window.addEventListener("mousemove", e => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+let mouse = { x: c.width/2, y: c.height/2 };
+addEventListener("mousemove", e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
 });
 
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,c.width,c.height);
 
-    // 1️⃣ Draw full darkness
-    ctx.fillStyle = "rgba(0,0,0,0.98)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // darkness
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0,c.width,c.height);
 
-    // 2️⃣ Create flashlight hole
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
-    ctx.clip();
+  // flashlight hole
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI*2);
+  ctx.clip();
 
-    // 3️⃣ Draw bouquet ONLY inside hole
-    ctx.drawImage(img, target.x, target.y, target.size, target.size);
+  // hidden object (RED BOX)
+  ctx.fillStyle = "red";
+  ctx.fillRect(400, 300, 200, 200);
 
-    ctx.restore();
+  ctx.restore();
 
-    // 4️⃣ Draw flashlight outline (visual feedback)
-    ctx.beginPath();
-    ctx.arc(mouse.x, mouse.y, 120, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Collision detection
-    if (
-        mouse.x > target.x &&
-        mouse.x < target.x + target.size &&
-        mouse.y > target.y &&
-        mouse.y < target.y + target.size
-    ) {
-        message.style.display = "flex";
-    }
-
-    requestAnimationFrame(draw);
+  requestAnimationFrame(draw);
 }
-
-img.onload = draw;
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+draw();
 </script>
 
 </body>
